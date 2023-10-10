@@ -15,6 +15,10 @@ Connectivity::Connectivity()
 void Connectivity::connectGPRS() 
 {
     // Attempt to establish a GPRS connection
+    
+    // Unlock the SIM card with the PIN
+    modem.simUnlock(SIM_PIN);
+    
     if (!modem.gprsConnect(APN, GPRS_USER, GPRS_PASS)) 
     {
         Serial.println("Failed to connect to GPRS on first attempt.");
@@ -34,6 +38,7 @@ void Connectivity::connectGPRS()
     }
     Serial.println("Connected to GPRS");
 }
+
 
 bool Connectivity::isGprsConnected()
 {

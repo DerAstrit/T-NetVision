@@ -1,11 +1,29 @@
 #pragma once
 #include <vector>
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
+#include <BLEEddystoneURL.h>
+#include <BLEEddystoneTLM.h>
+#include <BLEBeacon.h>
+#include <Arduino.h> 
 #include "BeaconData.h"
 
-// Class to handle BLE scanning operations
+class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
+{
+public:
+    std::vector<BeaconData> detectedBeacons;
+    void onResult(BLEAdvertisedDevice advertisedDevice);
+};
+
 class BLEScanner
 {
 public:
-    // Method to scan for BLE beacons and return a vector containing their data
+    BLEScanner();
+    void init();
     std::vector<BeaconData> scan();
+private:
+    BLEScan* pBLEScan;
+    MyAdvertisedDeviceCallbacks* pAdvertisedDeviceCallbacks;
 };

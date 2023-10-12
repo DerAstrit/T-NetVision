@@ -3,9 +3,14 @@
 
 struct BeaconData
 {
-    String UUID;           // UUID of the beacon
-    int16_t major;         // Major value for iBeacon. Typical range: 0-65535
-    int16_t minor;         // Minor value for iBeacon. Typical range: 0-65535
-    int8_t RSSI;           // Received Signal Strength Indication. Typical range: -127 to +20 dBm
-    int8_t batteryLevel;   // Battery level of the beacon (if available). Range: 0-100 (%)
+    String UUID;        // Unique identifier for the beacon
+    int16_t major;      // Group identifier for a subset of beacons
+    int16_t minor;      // Identifier for an individual beacon within a group
+    int8_t RSSI;        // Signal strength of the beacon
+    int8_t batteryLevel;// Battery level of the beacon, if available
+    
+    // Optional members, add if needed:
+    // String type;      // Type of beacon (e.g., iBeacon, Eddystone)
+    // String uuid_or_url;// Either the UUID or a URL, depending on beacon type
+    // int8_t txPower;   // Transmit power of the beacon
 };

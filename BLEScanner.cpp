@@ -1,48 +1,68 @@
 #include "BLEScanner.h"
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEScan.h>
-#include <vector>
-#include "DeviceConstants.h"
+
+BLEScanner::BLEScanner()
+{
+    BLEDevice::init("");
+    pBLEScan = BLEDevice::getScan();
+    pAdvertisedDeviceCallbacks = new MyAdvertisedDeviceCallbacks();
+    pBLEScan->setAdvertisedDeviceCallbacks(pAdvertisedDeviceCallbacks);
+    pBLEScan->setActiveScan(true);
+}
+
+void BLEScanner::init()
+{
+    pBLEScan->setInterval(100);
+    pBLEScan->setWindow(99);
+}
 
 std::vector<BeaconData> BLEScanner::scan()
 {
-    // Initialize BLE for scanning
-    BLEDevice::init("");
-    BLEScan *pBLEScan = BLEDevice::getScan();
-    pBLEScan->setActiveScan(true);
+    pBLEScan->start(5, false);
+    pBLEScan->clearResults(); // Clear results from BLEScan buffer to release memory
+    return pAdvertisedDeviceCallbacks->detectedBeacons;
+}
 
-    // Start scanning for BLE devices for the specified duration
-    BLEScanResults foundDevices = pBLEScan->start(BLE_SCAN_DURATION, false);
+void MyAdvertisedDeviceCallbacks::onResult(BLEAdvertisedDevice advertisedDevice)
+{
+    BeaconData beaconData;
+    beaconData.RSSI = advertisedDevice.getRSSI();
 
-    std::vector<BeaconData> detectedBeacons;
-
-    // Loop through all found devices
-    for (int i = 0; i < foundDevices.getCount(); i++)
+    // Check for iBeacon and get its data
+    if (advertisedDevice.haveManufacturerData())
     {
-        BLEAdvertisedDevice device = foundDevices.getDevice(i);
-
-        // Check if the device has manufacturer data of the expected length
-        // Expected data format: <2 bytes header><16 bytes UUID><2 bytes Major><2 bytes Minor><1 byte RSSI>
-        std::string manufacturerData = device.getManufacturerData();
-        if (device.haveManufacturerData() && manufacturerData.length() == 23)
+        std::string manData = advertisedDevice.getManufacturerData();
+        if (manData.size() == 25 && static_cast<uint8_t>(manData[0]) == 0x4C && static_cast<uint8_t>(manData[1]) == 0x00)
         {
-            std::string uuid = manufacturerData.substr(2, 16);
-            int major = manufacturerData[18] * 256 + manufacturerData[19];
-            int minor = manufacturerData[20] * 256 + manufacturerData[21];
-
-            BeaconData beaconData;
-            beaconData.UUID = uuid.c_str(); // Convert std::string to Arduino String
-            beaconData.major = major;
-            beaconData.minor = minor;
-            beaconData.RSSI = device.getRSSI();
-
-            // Add the beacon data to the list of detected beacons
+            BLEBeacon oBeacon = BLEBeacon();
+            oBeacon.setData(manData);
+            beaconData.major = oBeacon.getMajor();
+            beaconData.minor = oBeacon.getMinor();
             detectedBeacons.push_back(beaconData);
+            return;
         }
     }
 
-    pBLEScan->stop(); // Stop scanning
+    // Check for Eddystone and get its data
+    if (advertisedDevice.haveServiceData() && advertisedDevice.isAdvertisingService(BLEUUID((uint16_t)0xFEAA)))
+    {
+        std::string serviceData = advertisedDevice.getServiceData();
+        uint8_t firstByte = static_cast<uint8_t>(serviceData[0]);
+        if (firstByte == 0x10) // Eddystone URL
+        {
+            BLEEddystoneURL eddyURL = BLEEddystoneURL();
+            eddyURL.setData(serviceData);
+            detectedBeacons.push_back(beaconData);
+        }
+        else if (firstByte == 0x20) // Eddystone TLM
+        {
+            BLEEddystoneTLM eddyTLM = BLEEddystoneTLM();
+            eddyTLM.setData(serviceData);
+            detectedBeacons.push_back(beaconData);
+        }
+        return;
+    }
 
-    return detectedBeacons; // Return the list of detected beacons
+    // If no known beacon types were detected
+    detectedBeacons.push_back(beaconData);
 }
+

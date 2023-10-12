@@ -6,6 +6,8 @@
 
 int RestAPI::post(std::vector<BeaconData> beacons, float latitude, float longitude, String IMEI)
 {
+    Serial.println("Starting post function...");
+
     // Calculate the approximate size needed for the JSON object
     size_t jsonSize = JSON_OBJECT_SIZE(5) + JSON_ARRAY_SIZE(beacons.size()) * JSON_OBJECT_SIZE(4);
 
@@ -27,12 +29,15 @@ int RestAPI::post(std::vector<BeaconData> beacons, float latitude, float longitu
 
     String postData;
     serializeJson(doc, postData);
+    Serial.println("JSON created: " + postData);
 
     // HTTP logic: Create the HTTP client and configure the request
     HTTPClient http;
     http.begin(URL);  // Set the URL
     http.addHeader("Content-Type", "application/json");
     int httpResponseCode = http.POST(postData);  // Send the POST request
+    Serial.println("POST request sent. Response code: " + String(httpResponseCode)); 
+
 
     if (httpResponseCode > 0)
     {

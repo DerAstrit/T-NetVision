@@ -9,13 +9,15 @@ Connectivity connection;
 String imei;  // Global storage for IMEI
 
 void setup()
-{
+{   
     initSerialCommunication();
     if(!Serial) return;
     readAndPrintIMEI();
     if(imei == "") return;
+    Serial.println("initGPRSConnection");
     initGPRSConnection();
     if(!connection.isGprsConnected()) return;
+    Serial.println("initGPS");
     initGPS();
 }
 
@@ -41,6 +43,7 @@ void loop()
 void initSerialCommunication()
 {
     Serial.begin(9600); // Start serial communication for debugging purposes
+    Serial.println("initSerialCommunication");
 }
 
 void readAndPrintIMEI()
@@ -68,5 +71,6 @@ void initGPRSConnection()
 
 void initGPS()
 {
+    Serial.println("initGPS");
     connection.startGPS();
 }

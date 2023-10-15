@@ -17,7 +17,7 @@ void Connectivity::connectGPRS()
     // Attempt to establish a GPRS connection
     
     // Unlock the SIM card with the PIN
-    modem.simUnlock(SIM_PIN);
+    modem.simUnlock(GSM_PIN);
     
     if (!modem.gprsConnect(APN, GPRS_USER, GPRS_PASS)) 
     {

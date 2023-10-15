@@ -3,7 +3,7 @@
 #include "DeviceConstants.h"
 #include "Connectivity.h"
 #include <nvs_flash.h>  // Include NVS flash library
-
+//
 
 BLEScanner scanner;
 RestAPI api;

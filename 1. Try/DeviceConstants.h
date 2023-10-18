@@ -7,14 +7,17 @@ const char* const REST_API_URL = "https://personal-sl7oglgl.outsystemscloud.com/
 #define TINY_GSM_MODEM_SIM800
 #define TINY_GSM_USE_GPRS true
 #define TINY_GSM_USE_WIFI false
-const char* const GSM_PIN = "8671";
+
+const char* const GSM_PIN = "";
 const char* const APN = "gprs.swisscom.ch";
-const char* const GPRS_USER = "gprs";
-const char* const GPRS_PASS = "gprs";
+const char* const GPRS_USER = "";
+const char* const GPRS_PASS = "";
 
 // Beacon RSSI Threshold
 const int RSSI_THRESHOLD = -70; 
-const char* const TENANT_ID = "YourTenantID"; 
+
+const long int Device_ID = 1;
+const long int TENANT_ID = 1;
 
 // Time interval for posting data to the server (in milliseconds)
 const int POST_INTERVAL = 30000;
